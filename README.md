@@ -166,12 +166,6 @@ This project focuses on:
 **Aakanksha Yadav**
 B.Tech CSE Student | Aspiring Software Engineer
 
----
 
-## 📄 License
 
-This project is licensed under the MIT License.
 
----
-
-⭐ *If you like this project, consider giving it a star!*

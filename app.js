@@ -125,6 +125,5 @@ app.delete("/listings/:id" ,async (req,res)=>{
     console.log(deletedListing);
     res.redirect("/listings");
     
-
 })
 

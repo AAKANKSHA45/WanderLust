@@ -3,11 +3,13 @@ const app = express();
 const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const MONGO_URL =  "mongodb://127.0.0.1:27017/wanderlust";
+const ejsMate = require("ejs-mate");
 
 
 const Listing = require("./models/listing.js")
 const path = require("path");
 const ejs = require ("ejs");
+
 
 main().then(()=>{
     console.log("DB Connected");
@@ -25,6 +27,8 @@ app.set("view engine" , "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride("_method"));
+app.engine("ejs" , ejsMate);
+app.use(express.static(path.join(__dirname , "/public")));
 
 app.listen(8080 ,()=>{
     console.log("server is listening");

@@ -1,6 +1,9 @@
 body {
     padding-top: 5rem;
+    
+  font-family: "Plus Jakarta Sans", sans-serif !important;
 }
+
 
 /* navbar */
 
@@ -53,4 +56,41 @@ body {
     align-items: space-evenly;
     flex-wrap: wrap;
     background: #ebebeb;
+}
+
+/* cards */
+.card{
+    border:none !important;
+    margin-bottom:2rem;
+}
+/* some styling are already set by bootstrap, so we are adding our custum style in that place , so using !important */
+.card-img-top{ 
+    border-radius: 1rem !important;
+    width: 100% !important;
+    object-fit: cover !important;
+}
+
+.card-body{
+    padding: 0 !important ;
+
+}
+
+.card-text p {
+    font-weight: 400;
+}
+
+.listing-link{
+    text-decoration: none;
+
+}
+
+/* card effect */
+
+.card-img-overlay{
+    opacity : 0;
+}
+
+.card-img-overlay:hover{
+    opacity : 0.2;
+    background: white;
 }

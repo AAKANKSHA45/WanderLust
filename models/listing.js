@@ -14,10 +14,10 @@ const listingSchema = new Schema({
     filename: String,
     url:{ 
         type : String,
-        default: "https://unsplash.com/photos/body-of-water-near-trees-and-mountain-cliff-during-daytime-TWoL-QCZubY",
+        default:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
         set: (v) => {
         return v === "" 
-            ? "https://unsplash.com/photos/body-of-water-near-trees-and-mountain-cliff-during-daytime-TWoL-QCZubY"
+            ? "https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
             : v;
     }
 }

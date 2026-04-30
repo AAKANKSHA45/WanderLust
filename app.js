@@ -4,11 +4,14 @@ const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const MONGO_URL =  "mongodb://127.0.0.1:27017/wanderlust";
 const ejsMate = require("ejs-mate");
+const asyncWrap = require("./utils/wrapAsync.js");
+const ExpressError = require("./utils/ExpressError.js");
 
 
 const Listing = require("./models/listing.js")
 const path = require("path");
 const ejs = require ("ejs");
+const wrapAsync = require("./utils/wrapAsync.js");
 
 
 main().then(()=>{
@@ -54,11 +57,11 @@ app.get("/" ,(req,res)=>{
 // })
 
 // INDEX ROUTE
-app.get("/listings", async  (req,res)=>{
+app.get("/listings",  wrapAsync(async  (req,res)=>{
     let allListings = await Listing.find({});
     res.render("listings/index.ejs" , {allListings});
 
-})
+}))
 
 
 
@@ -70,64 +73,85 @@ app.get("/listings/new" ,  (req,res)=>{
 }) 
 
 // 2.create route
-app.post("/listings" ,async (req,res)=>{
-    // accessing data frm body : data is in js object because we have made name variable as object's key in new.ejs
+app.post("/listings" , wrapAsync(async (req,res,next)=>{
+    
+   if(!req.body.listing){
+    throw new ExpressError(400 ,"send valid data for listing")
+   }
+   
+
+   // accessing data frm body : data is in js object because we have made name variable as object's key in new.ejs
     let newlisting = req.body.listing;
     // inserting new data into db
       let data = await new Listing(newlisting)
     //   we can also write it direct : let data = await new Listing(req.body.listing)
-     data.save().then((res)=>{
-        console.log(res)
-     }).catch((err)=>{
-        console.log(err)
-     })
+      await data.save();
+    // .then((res)=>{
+    //     console.log(res)
+    //  }).catch((err)=>{
+    //     console.log(err)
+    //  })
 
     res.redirect("/listings");
 
+  
 
-   
-
-
-})
+}))
 
 
 
 
 // SHOW ROUTE
-app.get("/listings/:id" ,async (req,res)=>{
+app.get("/listings/:id" , wrapAsync(async (req,res)=>{
     let{id}=req.params;
     let listing = await Listing.findById(id);
     res.render("listings/show.ejs", {listing});
 
-})
+}))
 
 
 
 // UPDATE ROUTE
 
 // 1.edit Route
-app.get("/listings/:id/edit",async (req,res)=>{
+app.get("/listings/:id/edit", wrapAsync(async (req,res)=>{
     let {id} = req.params;
      let listing = await Listing.findById(id);
     res.render("listings/edit.ejs" , {listing});
-})
+}))
 
 // 2.update route
-app.put("/listings/:id",async (req,res)=>{
-    let{id} = req.params;
+app.put("/listings/:id", wrapAsync(async (req,res)=>{
+     if(!req.body.listing){
+    throw new ExpressError(400 ,"send valid data for listing")
+   }
+
+    let{id} = req.params; 
     let updateListing = {...req.body.listing} // body me jo data hai woh obj hai b/c we made that
     await Listing.findByIdAndUpdate(id ,updateListing);
     res.redirect(`/listings/${id}`)
 
-})
+}))
 
 
 // DELETE ROUTE
-app.delete("/listings/:id" ,async (req,res)=>{
+app.delete("/listings/:id" , wrapAsync(async (req,res)=>{
     let{id} = req.params;
     let deletedListing = await Listing.findByIdAndDelete(id);
     console.log(deletedListing);
     res.redirect("/listings");
     
+}))
+
+
+// for all other routes except above
+app.use((req,res,next)=>{
+    next(new ExpressError (404 ," Page not found"))
 })
 
+// error handling middleware
+app.use((err,req,res,next)=>{
+   let {statusCode = 500 , message = "something went wrong"} = err;
+   console.log(err);
+    res.status(statusCode).render("listings/error.ejs" , {message});
+})

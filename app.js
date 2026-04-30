@@ -6,6 +6,7 @@ const MONGO_URL =  "mongodb://127.0.0.1:27017/wanderlust";
 const ejsMate = require("ejs-mate");
 const asyncWrap = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
+const listingSchema = require("./schema.js")
 
 
 const Listing = require("./models/listing.js")
@@ -56,6 +57,17 @@ app.get("/" ,(req,res)=>{
 
 // })
 
+// put validation in a function
+const validateListing = (req,res,next)=>{
+    let {error} = listingSchema.validate(req.body) //joi :- validating upcoming data 
+    if (error){
+        let errMsg = error.details.map((el) =>el.message).join(",") //finding  exact message of error
+    throw new ExpressError(400 , errMsg);
+    }else{
+        next(); //go to the NEXT middleware or route.
+    }
+}
+
 // INDEX ROUTE
 app.get("/listings",  wrapAsync(async  (req,res)=>{
     let allListings = await Listing.find({});
@@ -73,12 +85,13 @@ app.get("/listings/new" ,  (req,res)=>{
 }) 
 
 // 2.create route
-app.post("/listings" , wrapAsync(async (req,res,next)=>{
+app.post("/listings" , validateListing , wrapAsync(async (req,res,next)=>{
     
-   if(!req.body.listing){
-    throw new ExpressError(400 ,"send valid data for listing")
-   }
-   
+//    let result = listingSchema.validate(req.body) //joi :- validating upcoming data 
+//    console.log(result);
+//    if (result.error){
+//     throw new ExpressError(400 , result.error)
+//    }
 
    // accessing data frm body : data is in js object because we have made name variable as object's key in new.ejs
     let newlisting = req.body.listing;
@@ -114,17 +127,17 @@ app.get("/listings/:id" , wrapAsync(async (req,res)=>{
 // UPDATE ROUTE
 
 // 1.edit Route
-app.get("/listings/:id/edit", wrapAsync(async (req,res)=>{
+app.get("/listings/:id/edit",  wrapAsync(async (req,res)=>{
     let {id} = req.params;
      let listing = await Listing.findById(id);
     res.render("listings/edit.ejs" , {listing});
 }))
 
 // 2.update route
-app.put("/listings/:id", wrapAsync(async (req,res)=>{
-     if(!req.body.listing){
-    throw new ExpressError(400 ,"send valid data for listing")
-   }
+app.put("/listings/:id",validateListing, wrapAsync(async (req,res)=>{
+//      if(!req.body.listing){
+//     throw new ExpressError(400 ,"send valid data for listing")
+//    }
 
     let{id} = req.params; 
     let updateListing = {...req.body.listing} // body me jo data hai woh obj hai b/c we made that

@@ -159,7 +159,7 @@ app.delete("/listings/:id" , wrapAsync(async (req,res)=>{
 
 // for all other routes except above
 app.use((req,res,next)=>{
-    next(new ExpressError (404 ," Page not found"))
+    next(new ExpressError (404 ," Page not found!"))
 })
 
 // error handling middleware

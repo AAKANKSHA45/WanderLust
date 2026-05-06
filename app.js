@@ -6,10 +6,19 @@ const MONGO_URL =  "mongodb://127.0.0.1:27017/wanderlust";
 const ejsMate = require("ejs-mate");
 const asyncWrap = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
+
+
 const listingSchema = require("./schema.js")
+const {reviewSchema} = require("./schema.js")
+// or 
+// const {listingSchema,reviewSchema} = require("./schema.js")
+
+
 
 
 const Listing = require("./models/listing.js")
+const Review = require("./models/review.js")
+
 const path = require("path");
 const ejs = require ("ejs");
 const wrapAsync = require("./utils/wrapAsync.js");
@@ -68,6 +77,27 @@ const validateListing = (req,res,next)=>{
     }
 }
 
+
+const validateReview = (req,res,next)=>{
+    let {error} = reviewSchema.validate(req.body) //joi :- validating upcoming data 
+    if (error){
+        let errMsg = error.details.map((el) =>el.message).join(",") //finding  exact message of error
+    throw new ExpressError(400 , errMsg);
+    }else{
+        next(); //go to the NEXT middleware or route.
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 // INDEX ROUTE
 app.get("/listings",  wrapAsync(async  (req,res)=>{
     let allListings = await Listing.find({});
@@ -117,7 +147,7 @@ app.post("/listings" , validateListing , wrapAsync(async (req,res,next)=>{
 // SHOW ROUTE
 app.get("/listings/:id" , wrapAsync(async (req,res)=>{
     let{id}=req.params;
-    let listing = await Listing.findById(id);
+    let listing = await Listing.findById(id).populate("reviews");
     res.render("listings/show.ejs", {listing});
 
 }))
@@ -156,6 +186,27 @@ app.delete("/listings/:id" , wrapAsync(async (req,res)=>{
     
 }))
 
+
+// REVIEW
+// post route
+// since listing and review have one to many relation se we have to store review(obj id) in listing too!!!
+app.post("/listings/:id/reviews",validateReview,wrapAsync(async(req , res)=>{
+    let listing = await Listing.findById(req.params.id);
+
+    // creating new review
+    let newReview = new Review (req.body.review);
+
+    // putting review into listing
+    listing.reviews.push(newReview);
+
+    await newReview.save();
+    await listing.save();
+    res.redirect(`/listings/${req.params.id}`);//redirecting to show page
+    // or
+    //  res.redirect(`/listings/${listing._id}`);
+
+
+}));
 
 // for all other routes except above
 app.use((req,res,next)=>{

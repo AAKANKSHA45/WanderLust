@@ -31,7 +31,6 @@ main().then(()=>{
 })
 
 
-
 async function main (){
     await mongoose.connect(MONGO_URL);
 }
@@ -81,12 +80,6 @@ const validateReview = (req,res,next)=>{
 
 // listings routes
 app.use("/listings" ,listings);
-
-
-
-
-
-
 
 
 

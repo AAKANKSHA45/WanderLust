@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const MONGO_URL =  "mongodb://127.0.0.1:27017/wanderlust";
 const ejsMate = require("ejs-mate");
-const asyncWrap = require("./utils/wrapAsync.js");
+
 const ExpressError = require("./utils/ExpressError.js");
 
 
@@ -14,14 +14,14 @@ const {reviewSchema} = require("./schema.js")
 // const {listingSchema,reviewSchema} = require("./schema.js")
 
 
-
-
 const Listing = require("./models/listing.js")
 const Review = require("./models/review.js")
 
 const path = require("path");
 const ejs = require ("ejs");
 const wrapAsync = require("./utils/wrapAsync.js");
+
+const listings = require("./routes/listing.js")
 
 
 main().then(()=>{
@@ -66,16 +66,7 @@ app.get("/" ,(req,res)=>{
 
 // })
 
-// put validation in a function
-const validateListing = (req,res,next)=>{
-    let {error} = listingSchema.validate(req.body) //joi :- validating upcoming data 
-    if (error){
-        let errMsg = error.details.map((el) =>el.message).join(",") //finding  exact message of error
-    throw new ExpressError(400 , errMsg);
-    }else{
-        next(); //go to the NEXT middleware or route.
-    }
-}
+
 
 
 const validateReview = (req,res,next)=>{
@@ -88,6 +79,8 @@ const validateReview = (req,res,next)=>{
     }
 }
 
+// listings routes
+app.use("/listings" ,listings);
 
 
 
@@ -95,96 +88,6 @@ const validateReview = (req,res,next)=>{
 
 
 
-
-
-
-// INDEX ROUTE
-app.get("/listings",  wrapAsync(async  (req,res)=>{
-    let allListings = await Listing.find({});
-    res.render("listings/index.ejs" , {allListings});
-
-}))
-
-
-
-// CREATE ROUTE 
-
-// 1.new route
-app.get("/listings/new" ,  (req,res)=>{
-    res.render("listings/new.ejs");
-}) 
-
-// 2.create route
-app.post("/listings" , validateListing , wrapAsync(async (req,res,next)=>{
-    
-//    let result = listingSchema.validate(req.body) //joi :- validating upcoming data 
-//    console.log(result);
-//    if (result.error){
-//     throw new ExpressError(400 , result.error)
-//    }
-
-   // accessing data frm body : data is in js object because we have made name variable as object's key in new.ejs
-    let newlisting = req.body.listing;
-    // inserting new data into db
-      let data = await new Listing(newlisting)
-    //   we can also write it direct : let data = await new Listing(req.body.listing)
-      await data.save();
-    // .then((res)=>{
-    //     console.log(res)
-    //  }).catch((err)=>{
-    //     console.log(err)
-    //  })
-
-    res.redirect("/listings");
-
-  
-
-}))
-
-
-
-
-// SHOW ROUTE
-app.get("/listings/:id" , wrapAsync(async (req,res)=>{
-    let{id}=req.params;
-    let listing = await Listing.findById(id).populate("reviews");
-    res.render("listings/show.ejs", {listing});
-
-}))
-
-
-
-// UPDATE ROUTE
-
-// 1.edit Route
-app.get("/listings/:id/edit",  wrapAsync(async (req,res)=>{
-    let {id} = req.params;
-     let listing = await Listing.findById(id);
-    res.render("listings/edit.ejs" , {listing});
-}))
-
-// 2.update route
-app.put("/listings/:id",validateListing, wrapAsync(async (req,res)=>{
-//      if(!req.body.listing){
-//     throw new ExpressError(400 ,"send valid data for listing")
-//    }
-
-    let{id} = req.params; 
-    let updateListing = {...req.body.listing} // body me jo data hai woh obj hai b/c we made that
-    await Listing.findByIdAndUpdate(id ,updateListing);
-    res.redirect(`/listings/${id}`)
-
-}))
-
-
-// DELETE ROUTE
-app.delete("/listings/:id" , wrapAsync(async (req,res)=>{
-    let{id} = req.params;
-    let deletedListing = await Listing.findByIdAndDelete(id);
-    console.log(deletedListing);
-    res.redirect("/listings");
-    
-}))
 
 
 // REVIEW
@@ -207,6 +110,26 @@ app.post("/listings/:id/reviews",validateReview,wrapAsync(async(req , res)=>{
 
 
 }));
+
+
+// delete review route
+app.delete("/listings/:id/reviews/:reviewId", async(req,res)=>{
+    let {id , reviewId} = req.params;
+
+    // update not delete because we are not deleting the listing we are updating it by deleting its review
+    await Listing.findByIdAndUpdate(id,  {$pull : {reviews : reviewId}})
+    await Review.findByIdAndDelete(reviewId);
+    res.redirect(`/listings/${id}`);
+
+
+})
+
+
+
+
+
+
+
 
 // for all other routes except above
 app.use((req,res,next)=>{

@@ -55,7 +55,8 @@
             <h5 class="card-title">Aakanksha</h5>
             <p class="card-text"><%=review.comment%></p>
             <p class="card-text"><%=review.rating%> Stars</p>
-            <form action="" class="mb-3">
+            <!-- route like this because we have to extract both listing and review b/c if review is deleted then italso must be deleted from listing -->
+            <form action="/listings/<%=listing._id%>/reviews/<%=review._id%>?_method=delete" class="mb-3" method="post">
               <button class="btn btn-sm btn-dark">Delete</button>
             </form>
 

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const Review = require("./review.js")
 
 
 const listingSchema = new Schema({
@@ -32,6 +33,22 @@ const listingSchema = new Schema({
             ref : "Review"
         },
     ],
+})
+
+
+// post mongoose middleware : it is wrtiten in this file b/c we want  Model logic stays with Model
+// middleware belongs to the MODEL, not the server.
+// Middleware describes:
+// "What should happen when this model performs an action?"
+
+
+listingSchema.post("findOneAndDelete" , async(listing)=>{
+    if (listing){
+        await Review.deleteMany({_id :{$in : listing.reviews}})
+
+    }
+
+
 })
 
 // creating collection

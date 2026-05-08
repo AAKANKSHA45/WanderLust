@@ -4,24 +4,13 @@ const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const MONGO_URL =  "mongodb://127.0.0.1:27017/wanderlust";
 const ejsMate = require("ejs-mate");
+const session = require("express-session");
+const flash = require("connect-flash");
 
 const ExpressError = require("./utils/ExpressError.js");
 
-
-
-
 const path = require("path");
 const ejs = require ("ejs");
-
-
-// requiring routes file
-const listings = require("./routes/listing.js")
-const reviews = require("./routes/review.js")
-
-
-
-
-
 main().then(()=>{
     console.log("DB Connected");
 }).catch((err)=>{
@@ -33,6 +22,39 @@ async function main (){
 }
 
 
+ const sessionOptions = {
+    secret : "secretCode",
+    resave : false,
+    saveUninitialized : true,
+    cookie :{
+        expires:Date.now() + 7*24*60*60*1000,//Date.now() return in milisec
+        maxAge:7*24*60*60*1000, // age of cookie
+        httpOnly : true
+    }
+
+};
+// express-session middleware
+app.use(session(sessionOptions));
+app.use(flash());
+
+app.use((req,res,next)=>{
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+})
+
+
+// requiring routes file
+const listings = require("./routes/listing.js")
+const reviews = require("./routes/review.js")
+
+
+
+
+
+
+
+
 
 app.set("view engine" , "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -40,6 +62,8 @@ app.use(express.urlencoded({extended:true}));
 app.use(methodOverride("_method"));
 app.engine("ejs" , ejsMate);
 app.use(express.static(path.join(__dirname , "/public")));
+
+
 
 app.listen(8080 ,()=>{
     console.log("server is listening");
@@ -84,9 +108,9 @@ app.use("/listings/:id/reviews" , reviews);
 
 
 // for all other routes except above
-app.use((req,res,next)=>{
-    next(new ExpressError (404 ," Page not found!"))
-})
+// app.use((req,res,next)=>{
+//     next(new ExpressError (404 ," Page not found!"))
+// })
 
 // error handling middleware
 app.use((err,req,res,next)=>{

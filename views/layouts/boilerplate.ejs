@@ -15,7 +15,11 @@
     <%- include("../includes/navbar.ejs")%>
    
     <!-- this will replace by the code of other ejs fileswhich wants to take layout -->
-    <div class="container"><%-body%></div> 
+    <div class="container">
+        <%- include("../includes/flash.ejs")%>
+
+        <%-body%>
+    </div> 
 
      <%- include("../includes/footer.ejs")%>
 

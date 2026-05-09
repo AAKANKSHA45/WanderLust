@@ -6,6 +6,9 @@ const MONGO_URL =  "mongodb://127.0.0.1:27017/wanderlust";
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local")
+const User = require("./models/user.js");
 
 const ExpressError = require("./utils/ExpressError.js");
 
@@ -35,7 +38,14 @@ async function main (){
 };
 // express-session middleware
 app.use(session(sessionOptions));
+
 app.use(flash());
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.use((req,res,next)=>{
     res.locals.success = req.flash("success");
@@ -43,10 +53,25 @@ app.use((req,res,next)=>{
     next();
 })
 
+// app.get("/demouser" , async(req , res) =>{
+//     // creating fake user
+//     let fakeUser = new User({
+//         email:"aakanksha45@gmail.com",
+//         username : "akku"
+//     })
+//     let registerdUser = await User.register(fakeUser , "4518");
+//     res.send(registerdUser);
+// })
+
+
+
+
+
 
 // requiring routes file
-const listings = require("./routes/listing.js")
-const reviews = require("./routes/review.js")
+const listingRouter = require("./routes/listing.js")
+const reviewRouter = require("./routes/review.js");
+const userRouter = require("./routes/user.js");
 
 
 
@@ -94,10 +119,14 @@ app.get("/" ,(req,res)=>{
 
 
 // listings routes
-app.use("/listings" ,listings);
+app.use("/listings" ,listingRouter);
 
 // review routes
-app.use("/listings/:id/reviews" , reviews);
+app.use("/listings/:id/reviews" , reviewRouter);
+
+// user routes
+app.use("/" , userRouter);
+
 
 
 

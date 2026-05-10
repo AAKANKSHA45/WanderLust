@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const Review = require("./review.js")
+const Review = require("./review.js");
+const User = require("./user.js");
 
 
 const listingSchema = new Schema({
@@ -27,12 +28,23 @@ const listingSchema = new Schema({
     location:String,
     country:String,
 
-    reviews: [
+    reviews: [//array because many reviews and reviews = array of IDs, not array of objects. e.g
+    // reviews: [
+        //   ObjectId("review1"),
+        //  ObjectId("review2")
+        //   ]
         {
             type: Schema.Types.ObjectId,
             ref : "Review"
         },
     ],
+    owner : {
+        type:Schema.Types.ObjectId,
+        ref : "User"
+    }
+
+
+
 })
 
 

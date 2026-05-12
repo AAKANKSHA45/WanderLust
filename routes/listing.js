@@ -47,11 +47,12 @@ router.post("/" , isLoggedIn  ,validateListing , wrapAsync(async (req,res,next)=
 //    }
 
    // accessing data frm body : data is in js object because we have made name variable as object's key in new.ejs
-    let newlisting = req.body.listing;
+      let data = req.body.listing;
     // inserting new data into db
-      let data = await new Listing(newlisting)
+      let newListing =  new Listing(data);
     //   we can also write it direct : let data = await new Listing(req.body.listing)
-      await data.save();
+      newListing.owner = req.user._id;
+      await newListing.save();
     // .then((res)=>{
     //     console.log(res)
     //  }).catch((err)=>{
@@ -72,11 +73,12 @@ router.post("/" , isLoggedIn  ,validateListing , wrapAsync(async (req,res,next)=
 // SHOW ROUTE
 router.get("/:id" , wrapAsync(async (req,res)=>{
     let{id}=req.params;
-    let listing = await Listing.findById(id).populate("reviews");
+    let listing = await Listing.findById(id).populate("reviews").populate("owner");
     if (!listing){
          req.flash("error" , "Listing does not exist!");
           return res.redirect("/listings")
     }
+    console.log(listing);
     res.render("listings/show.ejs", {listing});
 
 }))

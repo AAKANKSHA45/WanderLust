@@ -51,7 +51,7 @@ router.post("/",validateReview,wrapAsync(async(req , res)=>{
 router.delete("/:reviewId", async(req,res)=>{
     let {id , reviewId} = req.params;
 
-    // update not delete because we are not deleting the listing we are updating it by deleting its review
+    // update not delete(for listing) because we are not deleting the listing we are updating it by deleting its review
     await Listing.findByIdAndUpdate(id,  {$pull : {reviews : reviewId}})
     await Review.findByIdAndDelete(reviewId);
     req.flash("success" , "Review Deleted!")

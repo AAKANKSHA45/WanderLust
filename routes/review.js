@@ -5,33 +5,22 @@ const wrapAsync = require("../utils/wrapAsync.js");
 const ExpressError = require("../utils/ExpressError.js");
 const Review = require("../models/review.js")
 const Listing = require("../models/listing.js")
-
-
 const {reviewSchema} = require("../schema.js");
-// or 
-// const {listingSchema,reviewSchema} = require("./schema.js")
+const {validateReview , isLoggedIn , isReviewAuthor} = require("../middleware.js")
 
 
 
-// validation fn to validate review
-const validateReview = (req,res,next)=>{
-    let {error} = reviewSchema.validate(req.body) //joi :- validating upcoming data 
-    if (error){
-        let errMsg = error.details.map((el) =>el.message).join(",") //finding  exact message of error
-    throw new ExpressError(400 , errMsg);
-    }else{
-        next(); //go to the NEXT middleware or route.
-    }
-}
+
 
 
 // post route
 // since listing and review have one to many relation se we have to store review(obj id) in listing too!!!
-router.post("/",validateReview,wrapAsync(async(req , res)=>{
+router.post("/",validateReview ,isLoggedIn, wrapAsync(async(req , res)=>{
     let listing = await Listing.findById(req.params.id);
 
     // creating new review
     let newReview = new Review (req.body.review);
+    newReview.author = req.user._id;
 
     // putting review into listing
     listing.reviews.push(newReview);
@@ -48,7 +37,7 @@ router.post("/",validateReview,wrapAsync(async(req , res)=>{
 
 
 // delete review route
-router.delete("/:reviewId", async(req,res)=>{
+router.delete("/:reviewId", isLoggedIn, isReviewAuthor, async(req,res)=>{
     let {id , reviewId} = req.params;
 
     // update not delete(for listing) because we are not deleting the listing we are updating it by deleting its review

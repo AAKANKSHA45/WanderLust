@@ -9,13 +9,16 @@ const ExpressError = require("../utils/ExpressError.js");
 const Listing = require("../models/listing.js")
 const listingController = require("../controllers/listing.js");
 
-
-
-
-// INDEX ROUTE
-router.get(
-    "/", 
+// INDEX ROUTE and 2.create route
+router
+.route("/")
+.get(
      wrapAsync(listingController.index)
+)
+.post(
+    isLoggedIn ,
+    validateListing ,
+     wrapAsync(listingController.createListing)
 );
 
 
@@ -27,18 +30,25 @@ router.get("/new",
     listingController.renderNewForm
 );
 
-// 2.create route
-router.post("/" , 
-    isLoggedIn ,
-    validateListing ,
-     wrapAsync(listingController.createListing)
-);
 
-
-// SHOW ROUTE
-router.get("/:id" ,
+// SHOW ROUTE and 2.update route and DELETE ROUTE
+router
+.route("/:id")
+.get(
      wrapAsync(listingController.showListing)
-);
+)
+.put(
+    isLoggedIn ,
+    isOwner ,
+    validateListing,
+     wrapAsync(listingController.updateListing)
+)
+.delete(
+    isLoggedIn,
+    isOwner ,
+    wrapAsync(listingController.destroyListing)
+)
+
 
 
 // UPDATE ROUTE
@@ -50,21 +60,7 @@ router.get("/:id/edit",
     wrapAsync(listingController.renderEditForm)
 );
 
-// 2.update route
-router.put("/:id",
-    isLoggedIn ,
-    isOwner ,
-    validateListing,
-     wrapAsync(listingController.updateListing)
-);
 
-
-// DELETE ROUTE
-router.delete("/:id",
-    isLoggedIn,
-    isOwner ,
-    wrapAsync(listingController.destroyListing)
-);
 
 
 module.exports = router;

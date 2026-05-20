@@ -8,23 +8,24 @@ const userController = require("../controllers/user.js");
 
 
 // SIGNUP
-router.get(
-    "/signup" ,
+router
+.route("/signup")
+.get(
      userController.renderSignUpForm
-);
-
-router.post(
-    "/signup" ,
+)
+.post(
     wrapAsync (userController.signUp)
 );
 
-// LOGIN
-router.get(
-    "/login" ,
-    userController.renderLoginForm
-);
 
-router.post("/login",
+
+// LOGIN
+router
+.route("/login")
+.get(
+    userController.renderLoginForm
+)
+.post(
     saveRedirectUrl,
     // middleware 
     passport.authenticate("local" ,{
@@ -32,7 +33,7 @@ router.post("/login",
         failureFlash:true //give flash msg (implemented by passport)
     }),
     userController.login
-    );
+);
 
 // LOGOUT
 router.get(

@@ -36,15 +36,21 @@ module.exports.showListing = async (req,res)=>{
 
 
 module.exports.createListing = async (req,res,next)=>{
+    console.log (req.file);
     
 //    let result = listingSchema.validate(req.body) //joi :- validating upcoming data 
 //    console.log(result);
 //    if (result.error){
 //     throw new ExpressError(400 , result.error)
 //    }
+if(!req.file){
+   req.flash("error", "Please upload an image");
+   return res.redirect("/listings/new");
+}
      let url = req.file.path;
      let filename = req.file.filename;
     //  console.log(url ,"and" ,filename)
+
 
    // accessing data frm body : data is in js object because we have made name variable as object's key in new.ejs
       let data = req.body.listing;
@@ -59,6 +65,7 @@ module.exports.createListing = async (req,res,next)=>{
     //  }).catch((err)=>{
     //     console.log(err)
     //  })
+    
 
     req.flash("success" , "New Listing Created!")
 
@@ -75,8 +82,11 @@ module.exports.renderEditForm = async (req,res)=>{
          req.flash("error" , "Listing does not exist!");
         return res.redirect("/listings")
     }
+     let originalImageUrl = listing.image.url;
+    //some changes in url for the transformtion of image (not the whole url changed) : by cloudinary
+      let transformImageUrl = originalImageUrl.replace("/upload" , "/upload/w_250")
 
-    res.render("listings/edit.ejs" , {listing});
+    res.render("listings/edit.ejs" , {listing , transformImageUrl});
 };
 
 
@@ -88,7 +98,16 @@ module.exports.updateListing = async (req,res)=>{
 
     let{id} = req.params; 
     let updateData = {...req.body.listing} // body me jo data hai woh obj hai b/c we made that
-    await Listing.findByIdAndUpdate(id ,updateData);
+    let listing = await Listing.findByIdAndUpdate(id ,updateData);
+    // for image(file) updation
+    if(typeof req.file !== "undefined"){
+        let url = req.file.path;
+        let filename = req.file.filename;
+        listing.image = {url , filename};
+        await listing.save();
+    }
+    
+
     req.flash("success" , "Listing Updated!")
     res.redirect(`/listings/${id}`)
 

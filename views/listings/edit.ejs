@@ -3,7 +3,7 @@
     <div class="row mt-3">
         <div class="col-8 offset-2">
     <h3>Edit your Listing :</h3>
-   <form method="post" action="/listings/<%=listing._id%>?_method=put"  novalidate class="needs-validation">
+   <form method="post" action="/listings/<%=listing._id%>?_method=put"  novalidate class="needs-validation" enctype="multipart/form-data">
         
         <div class="mb-3">
          <label for="title" class="form-label">Title</label>
@@ -18,9 +18,14 @@
         </div>
 
         <div class="mb-3">
-       <label for="image" class="form-label">Image Link</label>
-        <input type="text" name="listing[image][url]"  value="<%=listing.image.url%>" id="image" class="form-control" required>
-        <div class="invalid-feedback">Please enter valid Image Link </div>
+            <h6>Original Listing Image</h6>
+            <img src="<%=transformImageUrl%>"/>
+        </div>
+
+        <div class="mb-3">
+        <label for="image" class="form-label">Upload New Image</label>
+        <input type="file" name="image"  id="image" class="form-control" required>
+        <!-- name="image" :  Because multer uploads file through req.file, not through nested object fields. -->
         </div>
 
         <div class="row">

@@ -13,17 +13,11 @@ const listingSchema = new Schema({
        type: String,
     },
     image: {
-    filename: String,
-    url:{ 
-        type : String,
-        default:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-        set: (v) => {
-        return v === "" 
-            ? "https://images.unsplash.com/photo-1507525428034-b723cf961d3e"
-            : v;
-    }
-}
-},
+        url:String,
+        filename:String,
+    
+   },
+
     price:Number,
     location:String,
     country:String,

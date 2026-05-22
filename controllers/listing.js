@@ -42,6 +42,9 @@ module.exports.createListing = async (req,res,next)=>{
 //    if (result.error){
 //     throw new ExpressError(400 , result.error)
 //    }
+     let url = req.file.path;
+     let filename = req.file.filename;
+    //  console.log(url ,"and" ,filename)
 
    // accessing data frm body : data is in js object because we have made name variable as object's key in new.ejs
       let data = req.body.listing;
@@ -49,6 +52,7 @@ module.exports.createListing = async (req,res,next)=>{
       let newListing =  new Listing(data);
     //   we can also write it direct : let data = await new Listing(req.body.listing)
       newListing.owner = req.user._id;
+      newListing.image = {url, filename} ;// adding into image field 
       await newListing.save();
     // .then((res)=>{
     //     console.log(res)

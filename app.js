@@ -126,10 +126,10 @@ app.listen(8080 ,()=>{
     console.log("server is listening");
 })
 
-// app.get("/" ,(req,res)=>{
-//     res.send("Root is working");
+app.get("/" ,(req,res)=>{
+    res.send("Root is working");
 
-// })
+})
 
 // app.get("/testing" , async (req,res)=>{
 //     let sampleListing = new Listing ({

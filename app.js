@@ -126,11 +126,6 @@ app.listen(8080 ,()=>{
     console.log("server is listening");
 })
 
-app.get("/" ,(req,res)=>{
-    res.send("Root is working");
-
-})
-
 // app.get("/testing" , async (req,res)=>{
 //     let sampleListing = new Listing ({
 //         title:"My new Home",
@@ -160,6 +155,10 @@ app.use("/listings/:id/reviews" , reviewRouter);
 app.use("/" , userRouter);
 
 
+app.get("/" ,(req,res)=>{
+    res.redirect("/listing");
+
+});
 
 
 
